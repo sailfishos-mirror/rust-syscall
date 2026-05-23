@@ -246,12 +246,38 @@ impl ContextVerb {
 // NOT ABI STABLE!
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u8)]
+pub enum AddrSpaceVerb {
+    MmapMin = 255,
+}
+impl AddrSpaceVerb {
+    pub fn try_from_raw(verb: u8) -> Option<Self> {
+        Some(match verb {
+            255 => Self::MmapMin,
+
+            _ => return None,
+        })
+    }
+}
+
+// NOT ABI STABLE!
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u8)]
 pub enum ProcSchemeVerb {
+    RegsInt = 250,
+    RegsFloat = 251,
+    RegsEnv = 252,
+    SchedAffinity = 253,
+    Start = 254,
     Iopl = 255,
 }
 impl ProcSchemeVerb {
     pub fn try_from_raw(verb: u8) -> Option<Self> {
         Some(match verb {
+            250 => Self::RegsInt,
+            251 => Self::RegsFloat,
+            252 => Self::RegsEnv,
+            253 => Self::SchedAffinity,
+            254 => Self::Start,
             255 => Self::Iopl,
             _ => return None,
         })
