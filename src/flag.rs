@@ -301,6 +301,26 @@ impl FileTableVerb {
     }
 }
 
+// NOT ABI-STABLE!
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u64)]
+pub enum AcpiVerb {
+    // copies the rsdt/xsdt to the payload buffer (the number of bytes that fit), and returns the
+    // rsdt/xsdt length regardless
+    ReadRxsdt = 1,
+    // no payload, just returns 0 or 1
+    CheckShutdown = 2,
+}
+impl AcpiVerb {
+    pub const fn try_from_raw(value: u64) -> Option<Self> {
+        Some(match value {
+            1 => Self::ReadRxsdt,
+            2 => Self::CheckShutdown,
+            _ => return None,
+        })
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(usize)]
 pub enum SchemeSocketCall {
