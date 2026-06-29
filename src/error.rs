@@ -8,7 +8,7 @@ pub struct Error {
 pub type Result<T, E = Error> = result::Result<T, E>;
 
 impl Error {
-    pub fn new(errno: i32) -> Error {
+    pub const fn new(errno: i32) -> Error {
         Error { errno }
     }
 
