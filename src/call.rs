@@ -8,19 +8,14 @@ use super::{
 
 use core::mem;
 
-/// Close a file
-pub fn close(fd: usize) -> Result<usize> {
-    unsafe { syscall1(SYS_CLOSE, fd) }
-}
-
 /// Get the current system time
 pub fn clock_gettime(clock: usize, tp: &mut TimeSpec) -> Result<usize> {
     unsafe { syscall2(SYS_CLOCK_GETTIME, clock, tp as *mut TimeSpec as usize) }
 }
 
-/// Copy and transform a file descriptor
-pub fn dup(fd: usize, buf: &[u8]) -> Result<usize> {
-    unsafe { syscall3(SYS_DUP, fd, buf.as_ptr() as usize, buf.len()) }
+/// Copy and transform a file descriptor into specified fd number
+pub fn dup_into(fd: usize, out: usize, buf: &[u8]) -> Result<usize> {
+    unsafe { syscall4(SYS_DUP_INTO, fd, buf.as_ptr() as usize, buf.len(), out) }
 }
 
 /// Copy and transform a file descriptor
@@ -174,47 +169,24 @@ pub fn nanosleep(req: &TimeSpec, rem: &mut TimeSpec) -> Result<usize> {
     }
 }
 
-/// Open a file at a specific path
-pub fn openat<T: AsRef<str>>(
+/// Open a file at a specific path into specified fd number
+pub fn openat_into<T: AsRef<str>>(
     fd: usize,
+    out: usize,
     path: T,
     flags: usize,
     fcntl_flags: usize,
 ) -> Result<usize> {
     let path = path.as_ref();
     unsafe {
-        syscall5(
-            SYS_OPENAT,
+        syscall6(
+            SYS_OPENAT_INTO,
             fd,
             path.as_ptr() as usize,
             path.len(),
             flags,
             fcntl_flags,
-        )
-    }
-}
-/// Open a file at a specific path with filter
-pub fn openat_with_filter<T: AsRef<str>>(
-    fd: usize,
-    path: T,
-    flags: usize,
-    fcntl_flags: usize,
-    euid: u32,
-    egid: u32,
-) -> Result<usize> {
-    let path = path.as_ref();
-    unsafe {
-        syscall6(
-            SYS_OPENAT_WITH_FILTER,
-            fd,
-            path.as_ptr() as usize,
-            path.len(),
-            flags | fcntl_flags,
-            // NOTE: Short-term solution to allow namespace management.
-            // In the long term, we need to figure out how we should best handle
-            // Unix permissions using capabilities.
-            euid as usize,
-            egid as usize,
+            out,
         )
     }
 }
@@ -224,31 +196,6 @@ pub fn unlinkat<T: AsRef<str>>(fd: usize, path: T, flags: usize) -> Result<usize
     let path = path.as_ref();
     unsafe { syscall4(SYS_UNLINKAT, fd, path.as_ptr() as usize, path.len(), flags) }
 }
-/// Remove a file at at specific path with filter
-pub fn unlinkat_with_filter<T: AsRef<str>>(
-    fd: usize,
-    path: T,
-    flags: usize,
-    euid: u32,
-    egid: u32,
-) -> Result<usize> {
-    let path = path.as_ref();
-    unsafe {
-        syscall6(
-            SYS_UNLINKAT_WITH_FILTER,
-            fd,
-            path.as_ptr() as usize,
-            path.len(),
-            flags,
-            // NOTE: Short-term solution to allow namespace management.
-            // In the long term, we need to figure out how we should best handle
-            // Unix permissions using capabilities.
-            euid as usize,
-            egid as usize,
-        )
-    }
-}
-
 /// Read from a file descriptor into a buffer
 pub fn read(fd: usize, buf: &mut [u8]) -> Result<usize> {
     unsafe { syscall3(SYS_READ, fd, buf.as_mut_ptr() as usize, buf.len()) }
@@ -277,29 +224,6 @@ pub fn write(fd: usize, buf: &[u8]) -> Result<usize> {
 /// This function will return Ok(0) on success
 pub fn sched_yield() -> Result<usize> {
     unsafe { syscall0(SYS_YIELD) }
-}
-
-/// Send a file descriptor `fd`, handled by the scheme providing `receiver_socket`. `flags` is
-/// currently unused (must be zero), and `arg` is included in the scheme call.
-///
-/// The scheme can return an arbitrary value.
-pub fn sendfd(receiver_socket: usize, fd: usize, flags: usize, arg: u64) -> Result<usize> {
-    #[cfg(target_pointer_width = "32")]
-    unsafe {
-        syscall5(
-            SYS_SENDFD,
-            receiver_socket,
-            fd,
-            flags,
-            arg as u32 as usize,
-            (arg >> 32) as u32 as usize,
-        )
-    }
-
-    #[cfg(target_pointer_width = "64")]
-    unsafe {
-        syscall4(SYS_SENDFD, receiver_socket, fd, flags, arg as usize)
-    }
 }
 
 pub trait Call {

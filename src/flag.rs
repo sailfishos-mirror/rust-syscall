@@ -55,7 +55,6 @@ pub const F_GETFD: usize = 1;
 pub const F_SETFD: usize = 2;
 pub const F_GETFL: usize = 3;
 pub const F_SETFL: usize = 4;
-pub const F_DUPFD_CLOEXEC: usize = 1030;
 
 pub const FUTEX_WAIT: usize = 0;
 pub const FUTEX_WAKE: usize = 1;
@@ -192,7 +191,6 @@ pub const O_SHLOCK: usize = 0x0010_0000;
 pub const O_EXLOCK: usize = 0x0020_0000;
 pub const O_ASYNC: usize = 0x0040_0000;
 pub const O_FSYNC: usize = 0x0080_0000;
-pub const O_CLOEXEC: usize = 0x0100_0000;
 pub const O_CREAT: usize = 0x0200_0000;
 pub const O_TRUNC: usize = 0x0400_0000;
 pub const O_EXCL: usize = 0x0800_0000;
@@ -288,14 +286,16 @@ impl ProcSchemeVerb {
 pub enum FileTableVerb {
     Close = 1,
     Dup2 = 2,
-    CloseCloExec = 3,
+    Reserved1 = 3,
+    Resize = 4,
 }
 impl FileTableVerb {
     pub fn try_from_raw(value: u8) -> Option<Self> {
         Some(match value {
             1 => Self::Close,
             2 => Self::Dup2,
-            3 => Self::CloseCloExec,
+            3 => Self::Reserved1,
+            4 => Self::Resize,
             _ => return None,
         })
     }

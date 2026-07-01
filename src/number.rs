@@ -10,13 +10,11 @@ pub const SYS_ARG_PATH: usize = 0x0300_0000;
 pub const SYS_RET: usize = 0x00F0_0000;
 pub const SYS_RET_FILE: usize = 0x0010_0000;
 
-pub const SYS_OPENAT: usize = SYS_CLASS_PATH | SYS_RET_FILE | 7;
-pub const SYS_OPENAT_WITH_FILTER: usize = SYS_CLASS_PATH | SYS_RET_FILE | 985;
+pub const SYS_OPENAT_INTO: usize = SYS_CLASS_PATH | SYS_RET_FILE | 987;
 pub const SYS_UNLINKAT: usize = SYS_CLASS_PATH | 263;
-pub const SYS_UNLINKAT_WITH_FILTER: usize = SYS_CLASS_PATH | 986;
 
 pub const SYS_CLOSE: usize = SYS_CLASS_FILE | 6;
-pub const SYS_DUP: usize = SYS_CLASS_FILE | SYS_RET_FILE | 41;
+pub const SYS_DUP_INTO: usize = SYS_CLASS_FILE | SYS_RET_FILE | 988;
 pub const SYS_DUP2: usize = SYS_CLASS_FILE | SYS_RET_FILE | 63;
 pub const SYS_READ: usize = SYS_CLASS_FILE | SYS_ARG_MSLICE | 3;
 pub const SYS_READ2: usize = SYS_CLASS_FILE | SYS_ARG_MSLICE | 35;
@@ -32,7 +30,6 @@ pub const SYS_FEVENT: usize = SYS_CLASS_FILE | 927;
 // TODO: new number for SYS_CALL where flags are sent as 6th argument (using syscall6)
 pub const SYS_CALL: usize = SYS_CLASS_FILE | SYS_ARG_SLICE | SYS_ARG_MSLICE | 0xCA11;
 
-pub const SYS_SENDFD: usize = SYS_CLASS_FILE | 34;
 pub const SYS_GETDENTS: usize = SYS_CLASS_FILE | 43;
 
 // TODO: Rename FMAP/FUNMAP to MMAP/MUNMAP
