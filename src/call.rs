@@ -1,6 +1,6 @@
 use super::{
     arch::*,
-    data::{Map, Stat, StatVfs, StdFsCallMeta, TimeSpec},
+    data::{Map, Stat, StdFsCallMeta, TimeSpec},
     error::Result,
     flag::*,
     number::*,
@@ -21,11 +21,6 @@ pub fn dup_into(fd: usize, out: usize, buf: &[u8]) -> Result<usize> {
 /// Copy and transform a file descriptor
 pub fn dup2(fd: usize, newfd: usize, buf: &[u8]) -> Result<usize> {
     unsafe { syscall4(SYS_DUP2, fd, newfd, buf.as_ptr() as usize, buf.len()) }
-}
-
-/// Change file permissions
-pub fn fchmod(fd: usize, mode: u16) -> Result<usize> {
-    unsafe { syscall2(SYS_FCHMOD, fd, mode as usize) }
 }
 
 /// Change file ownership
@@ -91,38 +86,9 @@ pub fn fstat(fd: usize, stat: &mut Stat) -> Result<usize> {
     }
 }
 
-/// Get metadata about a filesystem
-pub fn fstatvfs(fd: usize, stat: &mut StatVfs) -> Result<usize> {
-    unsafe {
-        syscall3(
-            SYS_FSTATVFS,
-            fd,
-            stat as *mut StatVfs as usize,
-            mem::size_of::<StatVfs>(),
-        )
-    }
-}
-
 /// Sync a file descriptor to its underlying medium
 pub fn fsync(fd: usize) -> Result<usize> {
     unsafe { syscall1(SYS_FSYNC, fd) }
-}
-
-/// Truncate or extend a file to a specified length
-pub fn ftruncate(fd: usize, len: usize) -> Result<usize> {
-    unsafe { syscall2(SYS_FTRUNCATE, fd, len) }
-}
-
-// Change modify and/or access times
-pub fn futimens(fd: usize, times: &[TimeSpec]) -> Result<usize> {
-    unsafe {
-        syscall3(
-            SYS_FUTIMENS,
-            fd,
-            times.as_ptr() as usize,
-            mem::size_of_val(times),
-        )
-    }
 }
 
 /// Fast userspace mutex
@@ -146,11 +112,6 @@ pub unsafe fn futex(
 /// Seek to `offset` bytes in a file descriptor
 pub fn lseek(fd: usize, offset: isize, whence: usize) -> Result<usize> {
     unsafe { syscall3(SYS_LSEEK, fd, offset as usize, whence) }
-}
-
-/// Make a new scheme namespace
-pub fn mkns(schemes: &[[usize; 2]]) -> Result<usize> {
-    unsafe { syscall2(SYS_MKNS, schemes.as_ptr() as usize, schemes.len()) }
 }
 
 /// Change mapping flags
